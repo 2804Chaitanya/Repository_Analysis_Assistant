@@ -1,4 +1,4 @@
-# 🔍 Repository Analysis Assistant (Codebase Intelligence)
+# 🔍 Repository Analysis Assistant
 
 <div align="center">
 
@@ -11,9 +11,9 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**AI-powered semantic code search, retrieval-augmented generation (RAG) Q&A, and automated codebase summarization for any software repository.**
+**An intelligent codebase companion providing semantic code search, retrieval-augmented Q&A, and automated architectural analysis for any software repository.**
 
-[Live Demo](https://huggingface.co/spaces/Dharanidhar1709/Repository-Analysis-Assistant) • [Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [API Reference](#-api-reference)
+[Key Features](#-key-features) • [System Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [API Reference](#-api-reference) • [Project Structure](#-project-directory-structure) • [License](#-license)
 
 </div>
 
@@ -21,97 +21,78 @@
 
 ## 📖 Overview
 
-**Repository Analysis Assistant** (Codebase Intelligence) is an end-to-end full-stack application designed to make navigating, understanding, and onboarding onto codebases effortless. Developers can either upload a project `.zip` archive or simply paste any public **GitHub repository URL**.
+**Repository Analysis Assistant** is an end-to-end full-stack intelligence platform built to eliminate the friction of onboarding, exploring, and navigating complex codebases. By accepting either a **public GitHub repository URL** or a **local `.zip` archive**, the system autonomously unpacks, indexes, and understands your project's codebase.
 
-The system parses and semantically chunks source files across multiple programming languages, enriches chunks with structural AST metadata, computes dense vector embeddings using SentenceTransformers, and indexes them in an isolated ChromaDB vector collection. Developers can then chat with their repository using Groq's high-speed **LLaMA-3.3-70B** model, run semantic vector searches across functions and classes, generate high-level architectural summaries, and automatically generate missing docstrings.
+Under the hood, the system parses source files into structural syntax components (classes, methods, functions, and notebook cells), augments each chunk with domain-specific metadata and call dependencies, generates dense vector representations using **SentenceTransformers**, and indexes them within session-isolated **ChromaDB** collections. Developers can then query their repository using natural language powered by **Groq Cloud's ultra-fast LLaMA-3.3-70B** model, run semantic vector searches, generate comprehensive repository summaries, and automatically document undocumented functions.
 
 ---
 
 ## ✨ Key Features
 
-- **🌐 Zero-Install GitHub URL Ingestion**: Clone and index any public GitHub repository directly in seconds—no manual downloading or packaging required.
-- **📦 ZIP Archive Upload**: Seamlessly drag-and-drop or select `.zip` archives of proprietary or local codebases.
-- **🧠 Multi-Language AST & Syntax Chunking**:
-  - **Python**: Full Abstract Syntax Tree (`ast`) traversal extracting functions, classes, methods, docstrings, and call dependencies.
-  - **Jupyter Notebooks**: Indexes `.ipynb` code cells independently with line context.
-  - **Multi-language support**: Javascript, TypeScript, React JSX/TSX, C, C++, Java, Go, Rust, Ruby, and Markdown.
-- **⚡ Enriched Semantic Embeddings**:
-  - Employs `sentence-transformers/all-MiniLM-L6-v2` to create rich vector representations.
-  - Prepends intelligent structural hints (e.g., API route handlers, data schemas, utility functions, parent classes, dependencies) to enhance semantic relevance.
-- **🔒 Multi-Session Isolation**:
-  - Each upload/clone generates a isolated ChromaDB collection identifier (`{upload_id}_{repo_name}`).
-  - Prevents multi-user data collision and ensures strict workspace privacy.
-- **💬 Retrieval-Augmented Generation (RAG) Q&A**:
-  - Queries vector space for top-$k$ relevant code fragments with cosine similarity.
-  - Synthesizes accurate, contextualized answers using **Groq LLaMA-3.3-70B-Versatile** (with fallback to `llama-3.1-8b-instant`).
-- **📊 AI Repository Summarization**:
-  - Generates executive-level architecture overviews, technology breakdown, and structural explanations.
-  - Uses smart sampling across distinct files to remain strictly within LLM token limits while maintaining broad coverage.
-- **📝 Automated Docstring Generation**:
-  - Automatically identifies functions and methods lacking documentation, generates standard Google/Sphinx style docstrings with LLM, updates source files, and dynamically re-indexes the vector store.
-- **🎨 Dual UI Themes (SaaS & Hacker)**:
-  - Clean **SaaS Light** editorial theme with Instrument Serif & DM Sans typography.
-  - Cyberpunk **Hacker Dark** theme with JetBrains Mono, glowing accents, and terminal vibes.
+### 🌐 Instant Ingestion & Processing
+- **Direct GitHub Ingestion**: Input any public GitHub repository link; the platform performs shallow cloning, automated parsing, and indexing on the fly.
+- **ZIP Archive Support**: Drag-and-drop or upload local `.zip` files of proprietary or internal projects with automatic cleanup.
+- **Session Isolation**: Every upload receives a unique collection identifier (`{upload_id}_{repo_name}`), isolating data between multiple concurrent sessions.
+
+### 🧠 Multi-Language AST Parsing & Chunking
+- **Python AST Traversal**: Uses Python's native `ast` engine to accurately identify classes, functions, and methods, capturing docstrings and tracking function-call dependencies.
+- **Jupyter Notebook Support**: Automatically parses `.ipynb` files, treating each execution cell as an individual chunk with complete metadata.
+- **Universal Multi-Language Scanner**: Out-of-the-box support for JavaScript, TypeScript, JSX/TSX, C, C++, Java, Go, Rust, Ruby, and Markdown files.
+
+### ⚡ Context-Enriched Vector Search & RAG
+- **Structural Context Augmentation**: Automatically injects architectural role markers (e.g., *API route handlers*, *data models*, *utility helpers*, *auth layers*) into embeddings for enhanced semantic matching.
+- **Dense Embeddings**: Employs `all-MiniLM-L6-v2` via SentenceTransformers for fast, 384-dimensional dense semantic vectors.
+- **LLaMA-3.3-70B Powered Q&A**: Employs Retrieval-Augmented Generation (RAG) with Groq Cloud inference to answer complex architectural questions with source file and line citations.
+
+### 📝 Automated Code Documentation & Summaries
+- **AI Repository Summaries**: Generates executive overviews and architectural breakdowns by stratifying samples across distinct files, staying cleanly within token boundaries.
+- **Auto-Generated Docstrings**: Inspects Python files for undocumented functions, generates Google/Sphinx style docstrings using LLM, updates source files, and dynamically re-indexes the repository.
+
+### 🎨 Dual-Themed Modern UI
+- **SaaS Light Mode**: Clean, editorial aesthetic with Instrument Serif and DM Sans typography for standard documentation and analysis workflows.
+- **Hacker Dark Mode**: Cyberpunk terminal aesthetic featuring JetBrains Mono, glowing accents, and high-contrast code blocks.
 
 ---
 
 ## 🏗️ System Architecture
 
-```
-                       ┌───────────────────────────────┐
-                       │   GitHub URL  /  ZIP Upload   │
-                       └───────────────┬───────────────┘
-                                       │
-                        Clone / Unpack & Normalize
-                                       │
-                                       ▼
-                       ┌───────────────────────────────┐
-                       │    Multi-Language Scanner     │
-                       │ (Python AST, Notebooks, C/JS) │
-                       └───────────────┬───────────────┘
-                                       │ Chunks with Metadata
-                                       ▼
-                       ┌───────────────────────────────┐
-                       │   Context Enrichment Engine   │
-                       │ (Tags, Callgraph Dependencies)│
-                       └───────────────┬───────────────┘
-                                       │ Text with Structural Hints
-                                       ▼
-                       ┌───────────────────────────────┐
-                       │   SentenceTransformer Model   │
-                       │     (all-MiniLM-L6-v2)        │
-                       └───────────────┬───────────────┘
-                                       │ Vectors (384-d)
-                                       ▼
-                       ┌───────────────────────────────┐
-                       │       ChromaDB Storage        │
-                       │  (Isolated Session Collection)│
-                       └───────────────┬───────────────┘
-                                       │
-               ┌───────────────────────┴───────────────────────┐
-               │                                               │
-               ▼                                               ▼
-     ┌───────────────────┐                           ┌───────────────────┐
-     │  Semantic Search  │                           │   RAG / Q&A LLM   │
-     │ Top-K similarity  │                           │ Groq LLaMA-3.3-70B│
-     └───────────────────┘                           └───────────────────┘
+The following diagram illustrates the complete ingestion and retrieval pipeline:
+
+```mermaid
+flowchart TD
+    subgraph Ingestion ["1. INGESTION & PROCESSING"]
+        A["GitHub URL / ZIP Upload"] --> B["Clone / Extract & Validate"]
+        B --> C["Recursive File Scanner"]
+        C --> D["Multi-Language AST Chunker"]
+        D --> E["Context Enrichment Engine\n(Roles, Dependencies, Docstrings)"]
+        E --> F["SentenceTransformers Embedder\n(all-MiniLM-L6-v2)"]
+        F --> G[("ChromaDB Vector Store\n(Session Isolated Collection)")]
+    end
+
+    subgraph QueryPipeline ["2. QUERY & INTELLIGENCE"]
+        H["User Query"] --> I["Query Vectorization"]
+        I --> J["Cosine Similarity Retrieval (Top-K)"]
+        G -.-> J
+        J --> K["Context Formatting & Prompt Assembly"]
+        K --> L["Groq Cloud LLM\n(LLaMA-3.3-70B)"]
+        L --> M["Synthesized Answer + Code Citations"]
+    end
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Details |
+| Component | Technology | Description |
 |---|---|---|
-| **Backend Framework** | [FastAPI](https://fastapi.tiangolo.com/) | Asynchronous Python REST API with lifespan model pre-loading |
-| **Server** | [Uvicorn](https://www.uvicorn.org/) | Lightning-fast ASGI production web server |
-| **LLM Provider** | [Groq Cloud](https://groq.com/) | High-throughput inference engine using `llama-3.3-70b-versatile` |
-| **Embeddings** | [SentenceTransformers](https://www.sbert.net/) | `all-MiniLM-L6-v2` (384-dimensional dense vectors) |
-| **Vector Database** | [ChromaDB](https://www.trychroma.com/) | Persistent vector store with Cosine distance metric |
-| **Code Parsing** | Python `ast`, Regex | Abstract syntax tree traversal, dependency extraction, notebook parsing |
-| **Frontend UI** | [React 18](https://react.dev/) + [Vite](https://vitejs.dev/) | Single-page application with responsive state management |
-| **Styling** | Modern CSS-in-JS | Dual-mode responsive design (SaaS Light & Hacker Dark) |
-| **Containerization** | [Docker](https://www.docker.com/) | Multi-stage Python 3.11-slim + Node.js runtime image |
+| **Backend API** | [FastAPI](https://fastapi.tiangolo.com/) | High-performance asynchronous Python REST API |
+| **Server Engine** | [Uvicorn](https://www.uvicorn.org/) | Production-grade ASGI web server |
+| **LLM Inference** | [Groq Cloud](https://groq.com/) | Ultra-low latency inference using `llama-3.3-70b-versatile` |
+| **Embeddings** | [SentenceTransformers](https://www.sbert.net/) | `all-MiniLM-L6-v2` dense embedding model |
+| **Vector Database** | [ChromaDB](https://www.trychroma.com/) | Embedded vector store with cosine distance indexing |
+| **AST Parsing** | Python `ast` module | AST traversal, docstring extraction, call-dependency mapping |
+| **Frontend UI** | [React 18](https://react.dev/) + [Vite](https://vitejs.dev/) | High-speed frontend with responsive state & dual themes |
+| **Containerization**| [Docker](https://www.docker.com/) | Lightweight container deployment with Python 3.11-slim & Node.js |
 
 ---
 
@@ -123,53 +104,46 @@ Ensure you have the following installed on your machine:
 - **Python 3.10+** (Python 3.11 recommended)
 - **Node.js 18+** & **npm**
 - **Git**
-- A free **Groq API Key** (obtainable from [Groq Console](https://console.groq.com/))
+- A free **Groq Cloud API Key** (obtainable from [Groq Console](https://console.groq.com/))
 
-### 1. Clone the Repository
+---
 
+### Step-by-Step Installation
+
+#### 1. Clone the Repository
 ```bash
 git clone https://github.com/2804Chaitanya/Repository_Analysis_Assistant.git
 cd Repository_Analysis_Assistant
 ```
 
-### 2. Set Up Environment Variables
-
-Create a `.env` file in the project root:
-
+#### 2. Configure Environment Variables
+Copy the example environment file:
 ```bash
 cp .env.example .env
 ```
-
-Open `.env` and add your Groq API key:
-
+Open `.env` and insert your Groq API key:
 ```env
 GROQ_API_KEY=gsk_your_actual_groq_api_key_here
 ```
 
-### 3. Backend Setup
-
-Create and activate a virtual environment:
-
+#### 3. Set Up Python Environment
+Create and activate an isolated virtual environment:
 ```bash
-# macOS/Linux
+# On macOS / Linux:
 python3 -m venv venv
 source venv/bin/activate
 
-# Windows
+# On Windows:
 python -m venv venv
 venv\Scripts\activate
 ```
-
-Install backend dependencies:
-
+Install the required Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Frontend Build
-
-Build the React frontend client so FastAPI can serve the static distribution:
-
+#### 4. Build the Frontend Client
+Compile the React single-page application into production assets:
 ```bash
 cd frontend
 npm install
@@ -177,31 +151,33 @@ npm run build
 cd ..
 ```
 
-### 5. Run the Application
-
-Start the FastAPI server:
-
+#### 5. Launch the Application
+Start the ASGI server:
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Once running, navigate to:
-- **Web Application**: [http://localhost:8000](http://localhost:8000)
-- **Interactive Swagger API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **ReDoc Documentation**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+Open your browser and navigate to:
+- **Web Interface**: `http://localhost:8000`
+- **Interactive Swagger Docs**: `http://localhost:8000/docs`
+- **ReDoc API Explorer**: `http://localhost:8000/redoc`
 
 ---
 
 ## 🐳 Docker Deployment
 
-You can build and deploy the application as a self-contained container:
+You can package and deploy the complete stack within a single Docker container:
 
 ```bash
-# Build the Docker image
+# 1. Build the Docker container image
 docker build -t repository-analysis-assistant .
 
-# Run the container with your Groq API key
-docker run -p 8000:8000 -e GROQ_API_KEY="your_groq_api_key_here" repository-analysis-assistant
+# 2. Run container exposing port 8000
+docker run -d \
+  --name repo-assistant \
+  -p 8000:8000 \
+  -e GROQ_API_KEY="your_groq_api_key_here" \
+  repository-analysis-assistant
 ```
 
 Access the application in your browser at `http://localhost:8000`.
@@ -210,47 +186,48 @@ Access the application in your browser at `http://localhost:8000`.
 
 ## 📡 API Reference
 
-The backend provides a comprehensive RESTful API under the `/repo` prefix:
+All backend routes are grouped under the `/repo` prefix:
 
 | Method | Endpoint | Description | Request Body / Parameters |
-|---|---|---|---|
-| `GET` | `/repo/health` | Health check for the service | None |
+|:---:|---|---|---|
+| `POST` | `/repo/index-url` | Clone and index a public GitHub repository | `{"url": "https://github.com/user/repo"}` |
 | `POST` | `/repo/upload` | Upload `.zip` archive, index, and return collection ID | `multipart/form-data` (`file`) |
-| `POST` | `/repo/index-url` | Clone and index public GitHub repository | `{"url": "https://github.com/user/repo"}` |
-| `POST` | `/repo/ask` | Ask questions over indexed codebase using RAG | `{"query": "...", "collection_name": "...", "k": 5}` |
-| `POST` | `/repo/search` | Semantic code search with cosine similarity | `{"query": "...", "collection_name": "...", "k": 5}` |
-| `POST` | `/repo/summarize` | AI-generated architectural repository summary | `{"collection_name": "..."}` |
-| `POST` | `/repo/generate-docstrings` | Generate missing docstrings and re-index | `{"path": ".", "collection_name": "..."}` |
-| `POST` | `/repo/scan` | Scan directory and return supported code files | Query param: `path` |
-| `POST` | `/repo/chunk` | Chunk a specific file into functions/classes | Query param: `path` |
-| `DELETE`| `/repo/session/{upload_id}` | Clean up ChromaDB vector collections | Path param: `upload_id` |
+| `POST` | `/repo/ask` | Ask questions across indexed codebase with RAG | `{"query": "...", "collection_name": "...", "k": 5}` |
+| `POST` | `/repo/search` | Perform semantic vector search over code chunks | `{"query": "...", "collection_name": "...", "k": 5}` |
+| `POST` | `/repo/summarize` | Generate AI architectural summary of the codebase | `{"collection_name": "..."}` |
+| `POST` | `/repo/generate-docstrings` | Detect missing docstrings, generate, and re-index | `{"path": ".", "collection_name": "..."}` |
+| `POST` | `/repo/scan` | Scan directory structure and list supported files | Query: `path` |
+| `POST` | `/repo/chunk` | Chunk a specific file into functions/classes | Query: `path` |
+| `GET` | `/repo/read` | Read contents of a specific file safely | Query: `path` |
+| `DELETE`| `/repo/session/{upload_id}` | Clean up ChromaDB vector collections | Path: `upload_id` |
+| `GET` | `/repo/health` | Service health status check | None |
 
-### Example cURL Requests
+### Example API Invocations
 
-#### Ingest via GitHub URL
+#### 1. Ingest via GitHub URL
 ```bash
 curl -X POST "http://localhost:8000/repo/index-url" \
      -H "Content-Type: application/json" \
      -d '{"url": "https://github.com/pallets/flask"}'
 ```
 
-#### Ask a Question (RAG)
+#### 2. Query Codebase (RAG)
 ```bash
 curl -X POST "http://localhost:8000/repo/ask" \
      -H "Content-Type: application/json" \
      -d '{
-       "query": "How is authentication handled in this project?",
+       "query": "How are route handlers registered in this framework?",
        "collection_name": "a1b2c3d4_flask",
        "k": 5
      }'
 ```
 
-#### Semantic Search
+#### 3. Semantic Code Search
 ```bash
 curl -X POST "http://localhost:8000/repo/search" \
      -H "Content-Type: application/json" \
      -d '{
-       "query": "vector embedding calculation",
+       "query": "token verification and middleware authentication",
        "collection_name": "a1b2c3d4_flask",
        "k": 3
      }'
@@ -262,63 +239,64 @@ curl -X POST "http://localhost:8000/repo/search" \
 
 ```plaintext
 Repository_Analysis_Assistant/
-├── .env.example                # Example environment configuration
+├── .env.example                # Sample environment configuration file
 ├── .gitignore                  # Git ignore rules for Python, Node, Chroma
 ├── Dockerfile                  # Container build recipe
-├── README.md                   # Project documentation
+├── LICENSE                     # MIT License
+├── README.md                   # Comprehensive project documentation
 ├── requirements.txt            # Python dependencies
 ├── app/                        # FastAPI Backend Application
-│   ├── main.py                 # Application entrypoint & static mount
+│   ├── main.py                 # Lifespan manager, model pre-loader, static mount
 │   ├── api/
-│   │   └── repo_routes.py      # REST endpoint definitions
+│   │   └── repo_routes.py      # REST endpoint definitions & request handlers
 │   └── services/
-│       ├── repo_loader.py      # Code file discovery & language mapping
-│       ├── chunker.py          # Python AST & multi-language chunker
-│       ├── embedder.py         # SentenceTransformers embedding model
-│       ├── vector_store.py     # ChromaDB persistence & collections
-│       ├── llm.py              # Groq LLaMA integration & RAG prompt
-│       ├── summarizer.py       # File tree builder & repo summarizer
-│       ├── git_handler.py      # Shallow Git cloning for remote repos
-│       ├── zip_handler.py      # Safe ZIP extraction & temp cleanup
-│       └── docstring_generator.py # AST docstring injector
-└── frontend/                   # React + Vite Frontend Application
-    ├── index.html              # HTML template
-    ├── package.json            # Node dependencies and build scripts
+│       ├── repo_loader.py      # Code file discovery, language mapping & size filters
+│       ├── chunker.py          # Python AST & multi-language syntax chunker
+│       ├── embedder.py         # SentenceTransformers embedding model & contextual tags
+│       ├── vector_store.py     # ChromaDB client, collection lifecycle & vector persistence
+│       ├── llm.py              # Groq Cloud LLaMA integration & RAG prompt orchestration
+│       ├── summarizer.py       # File tree builder & repo summarization engine
+│       ├── git_handler.py      # Shallow Git cloning for remote repositories
+│       ├── zip_handler.py      # Safe ZIP extraction & temporary storage cleanup
+│       └── docstring_generator.py # AST-based docstring injector & code updater
+└── frontend/                   # React + Vite Single-Page Application
+    ├── index.html              # HTML entry template
+    ├── package.json            # Node.js dependencies and build scripts
     ├── vite.config.js          # Vite bundler configuration
     ├── public/                 # Static assets (favicons, SVGs)
     └── src/
         ├── main.jsx            # React root mount
-        ├── App.jsx             # Main dashboard, dual themes & views
+        ├── App.jsx             # Dual-theme interface, upload zone, Q&A console
         ├── App.css             # Supplementary styling
-        └── index.css           # Global reset & baseline styles
+        └── index.css           # Global layout & baseline reset
 ```
 
 ---
 
 ## ⚡ Large Repository Optimizations
 
-Analyzing massive repositories with thousands of files introduces memory and LLM context challenges. This assistant solves them through:
-1. **File Tree Capping**: Truncates file hierarchies at 100 entries in summary generation while retaining overall counts.
-2. **Balanced Stratified Sampling**: Picks one representative chunk per unique file (up to 15 files) rather than multiple chunks from the same file for high-level summaries.
-3. **Chunk Batching**: Batches embedding generations in sets of 16 to prevent RAM spikes on resource-constrained hosting tiers.
-4. **Targeted Top-K Retrieval**: Limits context injection to high-relevance code blocks with cosine similarity thresholds.
+Large projects with hundreds or thousands of files can overwhelm vector databases and LLM context windows. This assistant implements tailored optimizations:
+1. **Dynamic File Tree Truncation**: Summarizer caps file tree displays at 100 entries while providing total counts to conserve prompt tokens.
+2. **Stratified Chunk Sampling**: The summarizer selects one representative chunk across diverse files (up to 15 distinct files) instead of saturating context with chunks from a single module.
+3. **Chunk Batching**: Embedder batches vector operations in sizes of 16 to avoid memory exhaustion on resource-constrained hardware.
+4. **Targeted Top-K Cosine Retrieval**: Only top-$k$ relevant code segments pass to the LLM context, keeping inference rapid and accurate.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature suggestions are always welcome!
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'feat: Add AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions are warmly welcomed! If you'd like to improve the project:
+1. **Fork** the repository
+2. Create a new branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'feat: Add AmazingFeature'`
+4. Push to your branch: `git push origin feature/AmazingFeature`
+5. Open a **Pull Request**
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for full details.
 
 ---
 
